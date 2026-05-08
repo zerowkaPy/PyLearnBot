@@ -19,7 +19,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from kb.smart_keyboard import SmartKeyboard
 
-load_dotenv(".venv")
+load_dotenv("params.venv")
 BOT_TOKEN = getenv("BOT_TOKEN")
 import filters  
 
@@ -47,18 +47,6 @@ async def start_user_handler(message:Message):
 reply_markup=user_kb.start
 )
 
-
-@user_router.message(F.text == "try")
-async def kb_try(message:Message):
-    kb = SmartKeyboard(message.from_user.id)
-    kb.add_butons(['Ярослав', 'Софія', 'Маша', 'Софія', 'Ярослав', 'Катя', 'Ярослав'])
-    kb.set_prop([2], 2)
-    await message.answer("hello", reply_markup=kb.get_keyboard())
-
-@user_router.callback_query(F.data == "next")
-async def next(cb:CallbackQuery):
-    kb = SmartKeyboard(cb.from_user.id)
-    await cb.message.edit_reply_markup(cb.inline_message_id, reply_markup=kb.get_keyboard())
 
 @admin_router.message(CommandStart())
 async def start_admin_handler(message:Message):

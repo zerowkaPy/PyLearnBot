@@ -1,4 +1,0 @@
-BOT_TOKEN = 8763693481:AAHKYeUYGMxSjtMHWm_TkkgKmsEXhHgy6LU
-CREATOR_ID = 777
-#CREATOR_ID настоящий = 1093973793, а выше находиться временная замена
-DATABASE_URL = postgres://postgres:2281@localhost:5432/pylearn
