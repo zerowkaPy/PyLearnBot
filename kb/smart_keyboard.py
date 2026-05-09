@@ -33,23 +33,33 @@ class SmartKeyboard:
         self.__page_num = None
         self.__rest = None
         self.__rows_num = None
-        self.__rows_num_cache = self.__rows_num
         self.__next_button = None
         self.__back_button = None
-        self.__back_button_need = False
-        self.__is_first_page = True
-        self.__button_cache = []
-        self.__page_counter = 0
-        self.__page_cash = {} # {str(self.__page_counter) :self.__button_cache[0:]}
-        self.__page_rollback = {}
+        self.__pages = {}
+        self.__pages_prop = {}
+        self.__count = 1
+
         self._initialized = True  # флаг ініціалізації
+
+    def init_keyboard(self):
+        self.__adjust = None
+        self.__buttons = None
+        self.__page_num = None
+        self.__rest = None
+        self.__rows_num = None
+        self.__next_button = None
+        self.__back_button = None
+        self.__pages = {}
+        self.__pages_prop = {}
+        self.__count = 1
 
 
     def __kb_prop(self):
         self.__page_num = len(self.__buttons) // self.__rows_num
         self.__rest = len(self.__buttons) % self.__rows_num
-        if self.__page_num > 1:
-            self.__set_back_button()
+
+        if self.__rest:
+            self.__page_num = self.__page_num+1
 
     def __prop_check(self):
         if self.__adjust:
@@ -65,7 +75,30 @@ class SmartKeyboard:
         self.__next_button = next_button
         self.__back_button = back_button
         self.__kb_prop()
-        self.__is_correct_adjust()
+
+        for page in range(self.__page_num):
+            page +=1
+            self.__pages[str(page)] = [button for button in self.__buttons[:self.__rows_num]]
+            self.__buttons = self.__buttons[self.__rows_num:]
+            self.__last_page = page
+
+        if self.__rest:
+            self.__pages[str(self.__last_page+1)] = [button for button in self.__buttons]
+            self.__buttons.clear()
+
+        for page in range(self.__page_num):
+            page+=1
+            if self.__page_num == 1 and self.__rest == 0:
+                self.__pages_prop[str(page)] = "none"
+            elif page == 1:
+                self.__pages_prop[str(page)] = "n"
+            elif self.__page_num - page == 0 and self.__rest:
+                self.__pages_prop[str(page)] = 'b'
+            elif self.__page_num - page == 0:
+                self.__pages_prop[str(page)] = "b"
+            else:
+                self.__pages_prop[str(page)] = "bn"
+
 
     def add_butons(self, buttons:list[str]):
         if type(buttons) != list:
@@ -74,140 +107,72 @@ class SmartKeyboard:
             raise ValueError("buttons parameter must contain at least 1 string")
         self.__buttons = buttons
 
-    def __add_page_in_cache(self):
-        buttons = tuple(self.__button_cache[0:])
-        self.__page_counter += 1
-        counter = str(self.__page_counter)
-        print("counter in add page cash", counter)
-        self.__page_cash[counter] = buttons
-        print(self.__page_cash[str(self.__page_counter)] )
-        self.__button_cache.clear()
-
-    def __is_final(self):
-        if self.__page_num == 0:
-            return True
-        elif self.__page_num <= 1 and self.__rest == 0:
-            return True
-        else:
-            return False
-
-    def __is_full(self):
-        if self.__page_num > 1:
-            return True
-        if self.__rest == 0:
-            return True
-        else:
-            return False
-        
-    def __set_back_button(self):
-        self.__back_button_need = True
-    def __remove_back_button(self):
-        self.__back_button_need = False
-    
-    def __is_back_button_need(self):
-        if self.__is_first_page:
-            return False
-        else:
-            return True
-        
-    def __delete(self):
-        self._instance.pop(self.__user_id)
-
-    def __is_correct_adjust(self):
-        summa = 0
-        for adjust in self.__adjust:
-            summa += adjust
-        if summa > self.__rows_num:
-            raise ValueError("adjusts summa mast be eqal to rows_num")
-        
         
     def get_keyboard(self):
         if self.__prop_check():
-            if self.__is_final():
-                if self.__is_full():
-                    builder = InlineKeyboardBuilder()
-                    for button in range(self.__rows_num):
-                        button_text = self.__buttons.pop(0)
-                        self.__button_cache.append(button_text)
-                        builder.add(InlineKeyboardButton(text=button_text, callback_data=button_text))
-                    self.__page_num -= 1
-                    if self.__is_back_button_need():
-                        builder.add(InlineKeyboardButton(text=self.__back_button, callback_data=self.__back_button))
-                        self.__button_cache.append(self.__back_button)
-                        builder.adjust(*self.__adjust, 1)
-                    else:
-                        builder.adjust(*self.__adjust)
-                    # self.__delete()
-                    self.__add_page_in_cache()
-                    self.__is_first_page = False
-                    return builder.as_markup()
-                else:
-                    builder = InlineKeyboardBuilder()
-                    for button in range(self.__rest):
-                        button_text = self.__buttons.pop(0)
-                        self.__button_cache.append(button_text)
-                        builder.add(InlineKeyboardButton(text=button_text, callback_data=button_text))
-                    self.__page_num -= 1
-                    if self.__is_back_button_need():
-                        builder.add(InlineKeyboardButton(text=self.__back_button, callback_data=self.__back_button))
-                        self.__button_cache.append(self.__back_button)
-                        builder.adjust(*self.__adjust, 1)
-                    else:
-                        builder.adjust(*self.__adjust)
-                    # self.__delete()
-                    self.__add_page_in_cache()
-                    self.__is_first_page = False
-                    return builder.as_markup()
-
-            else:
-                builder = InlineKeyboardBuilder()
-                for button in range(self.__rows_num):
-                    button_text = self.__buttons.pop(0)
-                    self.__button_cache.append(button_text)
-                    builder.add(InlineKeyboardButton(text=button_text, callback_data=button_text))
-                builder.add(InlineKeyboardButton(text=self.__next_button, callback_data=self.__next_button))
-                self.__button_cache.append(self.__next_button)
-                if self.__is_back_button_need():
-                    builder.add(InlineKeyboardButton(text=self.__back_button, callback_data=self.__back_button))
-                    self.__button_cache.append(self.__back_button)
-                    builder.adjust(*self.__adjust, 1, 1)
-                else:
-                    builder.adjust(*self.__adjust, 1)
-                self.__page_num -= 1
-                self.__add_page_in_cache()
-                self.__is_first_page = False
+            builder = InlineKeyboardBuilder()
+            page = self.__pages_prop[str(self.__count)]
+            if page == 'none':
+                for button in self.__pages[str(self.__count)]:
+                    builder.add(InlineKeyboardButton(text=button, callback_data=button))
+                builder.adjust(*self.__adjust)
+                self.__count +=1
                 return builder.as_markup()
-            
-                # if self.__is_correct_adjust():
-                #     builder.adjust(*self.__adjust, 1)
-                #     self.__page_num -= 1
-                #     return builder.as_markup()
-                # else:
-                #     raise ValueError("adjusts summa mast be eqal to rows_num")
+            if page == 'n':
+                for button in self.__pages[str(self.__count)]:
+                    builder.add(InlineKeyboardButton(text=button, callback_data=button))
+                builder.add(InlineKeyboardButton(text=self.__next_button, callback_data=self.__next_button))
+                builder.adjust(*self.__adjust, 1)
+                self.__count +=1
+                return builder.as_markup()
+            if page == 'bn':
+                for button in self.__pages[str(self.__count)]:
+                    builder.add(InlineKeyboardButton(text=button, callback_data=button))
+                builder.add(InlineKeyboardButton(text=self.__next_button, callback_data=self.__next_button))
+                builder.add(InlineKeyboardButton(text=self.__back_button, callback_data=self.__back_button))
+                builder.adjust(*self.__adjust, 1, 1)
+                self.__count +=1
+                return builder.as_markup()
+            if page == 'b':
+                for button in self.__pages[str(self.__count)]:
+                    builder.add(InlineKeyboardButton(text=button, callback_data=button))
+                builder.add(InlineKeyboardButton(text=self.__back_button, callback_data=self.__back_button))
+                builder.adjust(*self.__adjust, 1)
+                self.__count +=1
+                return builder.as_markup()
         else:
             raise RuntimeError("You must execute set_prop() before calling get_keyboard()")
         
     def previous_keyboard(self):
-        self.__page_counter -= 1
-        count = str(self.__page_counter)
-        buttons = self.__page_cash[count]
         builder = InlineKeyboardBuilder()
-        for button_text in buttons:
-            builder.add(InlineKeyboardButton(text=button_text, callback_data=button_text))
-        builder.adjust(*self.__adjust, 1, 1)
-
-        # Сначала >= x
-        for key, value in self.__page_cash.items():
-            if int(key) >= self.__page_counter + 1:
-                self.__buttons.extend(value)
-        # Потом < x
-        for key, value in self.__page_cash.items():
-            if int(key) < self.__page_counter + 1:
-                self.__buttons.extend(value)
-
-                self.__page_num +=1
+        count = self.__count - 2
+        self.__count -=1
+        page = self.__pages_prop[str(count)]
+        if page == 'none':
+                for button in self.__pages[str(count)]:
+                    builder.add(InlineKeyboardButton(text=button, callback_data=button))
+                builder.adjust(*self.__adjust)
+                # self.__count +=1
                 return builder.as_markup()
-
-
-
-    
+        if page == 'n':
+                for button in self.__pages[str(count)]:
+                    builder.add(InlineKeyboardButton(text=button, callback_data=button))
+                builder.add(InlineKeyboardButton(text=self.__next_button, callback_data=self.__next_button))
+                builder.adjust(*self.__adjust, 1)
+                # self.__count +=1
+                return builder.as_markup()
+        if page == 'bn':
+            for button in self.__pages[str(count)]:
+                builder.add(InlineKeyboardButton(text=button, callback_data=button))
+            builder.add(InlineKeyboardButton(text=self.__next_button, callback_data=self.__next_button))
+            builder.add(InlineKeyboardButton(text=self.__back_button, callback_data=self.__back_button))
+            builder.adjust(*self.__adjust, 1, 1)
+            # self.__count +=1
+            return builder.as_markup()
+        if page == 'b':
+            for button in self.__pages[str(count)]:
+                builder.add(InlineKeyboardButton(text=button, callback_data=button))
+            builder.add(InlineKeyboardButton(text=self.__back_button, callback_data=self.__back_button))
+            builder.adjust(*self.__adjust, 1)
+            self.__count +=1
+            return builder.as_markup()

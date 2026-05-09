@@ -10,6 +10,7 @@ start = __start.as_markup()
 
 __ex_level = InlineKeyboardBuilder()
 __ex_level.add(
-    InlineKeyboardButton(text="Легкий", callback_data="easy")
+    InlineKeyboardButton(text="Легкий", callback_data="easy"),
+    InlineKeyboardButton(text="Середній", callback_data="middle")
 )
 ex_level = __ex_level.as_markup()
