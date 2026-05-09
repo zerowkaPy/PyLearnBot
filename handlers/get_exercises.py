@@ -24,13 +24,24 @@ async def kb_try(callback:CallbackQuery):
     await callback.message.edit_text("Треба ще більше кнопок...", reply_markup=kb.get_keyboard())
 
 @user_router.callback_query(F.data == "middle")
-async def kb_try(callback:CallbackQuery):
+async def kb_try1(callback:CallbackQuery):
     kb = SmartKeyboard(callback.from_user)
     kb.init_keyboard()
-    kb.add_butons(['1👻', '2', '3', '4', '5👻', '6', '7', '8', '9', '10', '11👻', '12', '13', '14', '15',
+    kb.add_butons(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15',
                 '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31', '32', '35' ])
-    kb.set_prop([3,2], 5, back_button="Назад", next_button="Далі")
+    kb.set_prop([3,2], 5, back_button="Назад", next_button="Далі", home_button="На головну")
     await callback.message.edit_text("Треба ще більше кнопок...", reply_markup=kb.get_keyboard())
+
+
+@user_router.callback_query(F.data == "На головну")
+async def kb_try2(callback:CallbackQuery):
+    SmartKeyboard.delete_user(callback.from_user)
+    await callback.message.answer(
+"""Ви повернулися на головну""",
+reply_markup=user_kb.start
+)
+    await callback.message.delete()
+
 
 @user_router.callback_query(F.data == "Далі")
 async def next(callback:CallbackQuery):

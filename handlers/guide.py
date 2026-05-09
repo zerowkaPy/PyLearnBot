@@ -1,10 +1,12 @@
 from aiogram.types import Message
 from aiogram import F
+from aiogram.filters.command import Command
 from aiogram.enums import ParseMode
 
 from routers import user_router
 
 @user_router.message(F.text == "Гайд 📖")
+@user_router.message(Command("guide"))
 async def guide(message:Message):
     await message.answer(
 """Ми пропонуємо вам невеликі але дуже корисні завдання для покращення або пітримання ваших навичок з  Python
