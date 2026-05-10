@@ -18,9 +18,8 @@ async def exercises(message:Message):
 async def kb_try(callback:CallbackQuery):
     kb = SmartKeyboard(callback.from_user)
     kb.init_keyboard()
-    kb.add_butons(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15',
-                '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30'])
-    kb.set_prop([5,5,5,5,5,5], 20, back_button="Назад", next_button="Далі")
+    kb.add_butons(["Задача 1: print()"])
+    kb.set_prop([6], 1, back_button="Назад", next_button="Далі")
     await callback.message.edit_text("Треба ще більше кнопок...", reply_markup=kb.get_keyboard())
 
 @user_router.callback_query(F.data == "middle")
