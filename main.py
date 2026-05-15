@@ -22,8 +22,8 @@ from aiogram.fsm.context import FSMContext
 load_dotenv("params.env")
 BOT_TOKEN = getenv("BOT_TOKEN")
 DATABASE_URL = getenv("DATABASE_URL")
-import filters  
 
+import filters
 from handlers import guide, get_exercises
 from routers import user_router, admin_router
 from kb.smart_keyboard import SmartKeyboard
@@ -49,13 +49,12 @@ async def start_admin_handler(message:Message):
 
 
 
-bot = Bot(BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+bot = Bot(BOT_TOKEN)
 
 
 dp = Dispatcher(storage=PostgreStorage())
 dp.include_routers(user_router, admin_router)
-user_router.message.filter(filters.UserFilter())
-admin_router.message.filter(filters.AdminFilter())
+
 
 
 @dp.shutdown()

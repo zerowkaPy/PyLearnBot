@@ -1,5 +1,5 @@
 from aiogram.filters.base import Filter
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Filter
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Update
@@ -29,3 +29,4 @@ class StateFilter(Filter):
     async def __call__(self, event:Update, state:FSMContext):
         current_state:str = await state.get_state()
         return self.expected_state == current_state
+    

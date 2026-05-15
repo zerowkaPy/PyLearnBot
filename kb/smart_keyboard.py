@@ -38,6 +38,13 @@ class SmartKeyboard:
         self._kb_init = True
 
     @classmethod
+    def check_user(cls, from_user:User):
+        user_id = str(from_user.id)
+        if user_id in cls._instance:
+            return True
+        return False
+
+    @classmethod
     def delete_user(cls, from_user:User):
         user_id = str(from_user.id)
         cls._instance.pop(user_id)
